@@ -139,6 +139,7 @@ class APKPureScraper:
                 apk_download_url=apk_download_url).exists():
             response = self.retry(apk_download_url)
             total_size = int(response.headers.get('content-length', 0))
+
             download_dir = r'E:\apkdjango\apkmoreversion\apkapps\downloads'
             # download_dir = r'E:\python\test\app\apkapps\downloads'
             # download_dir = 项目路径 + 'apkmoreversion/apkapps/downloads'
