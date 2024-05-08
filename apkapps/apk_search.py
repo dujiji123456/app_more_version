@@ -12,7 +12,7 @@ from concurrent import futures
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import threading
-import pooch
+# import pooch
 from .models import MoreVersionApk
 
 logger = logging.getLogger("global_logger")
@@ -121,41 +121,47 @@ class APKPureScraper:
 
     def multi_thread(self, app_more_version_list):
         n = 1
-        splitList = [app_more_version_list[i:i + n] for i in range(0, len(app_more_version_list), n)]
         threads = []
-        for i in range(len(splitList)):
-            t = threading.Thread(target=self.down_app, args=(splitList[i]))
+        print("长度：", len(app_more_version_list))
+        for i in range(len(app_more_version_list)):
+            print(11111111111, app_more_version_list[i])
+            t = threading.Thread(target=self.down_app, args=(app_more_version_list[i],))  # 这里将splitList[i]传递给down_app方法
             threads.append(t)
             t.start()
 
-    import os
-    from tqdm import tqdm
 
     def down_app(self, torront):
         apk_download_url = torront['apk_download_url']
         apk_name = torront['apk_name']
         apk_version = torront['apk_version']
         update_content = torront['change_log']
-        if 'XAPK' not in apk_download_url:
+        if 'XAPK' not in apk_download_url and not MoreVersionApk.objects.filter(
+                apk_download_url=apk_download_url).exists():
             response = self.retry(apk_download_url)
             total_size = int(response.headers.get('content-length', 0))
             download_dir = r'E:\apkdjango\apkmoreversion\apkapps\downloads'
+            # download_dir = r'E:\python\test\app\apkapps\downloads'
             # download_dir = 项目路径 + 'apkmoreversion/apkapps/downloads'
             if not os.path.lexists(os.path.join(download_dir, apk_name)):
-                os.mkdir(os.path.join(download_dir, apk_name))
+                os.makedirs(os.path.join(download_dir, apk_name), exist_ok=True)
             if response:
+                down_path = os.path.join(download_dir, apk_name, f'{apk_name}_{apk_version}.apk')
                 with tqdm(total=total_size, unit='B', unit_scale=True, desc=f'{apk_name}_{apk_version}',
                           ncols=100) as pbar:
-                    with open(os.path.join(download_dir, apk_name, f'{apk_name}_{apk_version}.apk'), 'wb') as f:
+                    with open(down_path, 'wb') as f:
                         for chunk in response.iter_content(chunk_size=8192):
                             if chunk:
                                 f.write(chunk)
                                 pbar.update(len(chunk))
-                down_path = os.path.join(download_dir, apk_name, f'{apk_name}_{apk_version}.apk')
-                MoreVersionApk.objects.create(apk_version=apk_version, apk_name=apk_name,
-                                              apk_download_url=apk_download_url, update_content=update_content,
-                                              down_path=down_path)
 
+                try:
+
+                    MoreVersionApk.objects.create(apk_version=apk_version, apk_name=apk_name,
+                                                  apk_download_url=apk_download_url, update_content=update_content,
+                                                  down_path=down_path)
+                except Exception as e:
+                    print(e)
+                    pass
 
             else:
                 return
