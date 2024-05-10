@@ -21,15 +21,15 @@ async def async_search_apk_function(request):
 
 
             return JsonResponse({
-                'code': 404,
+                'code': 1,
                 'msg': '失败',
-                'data': result
+                # 'data': result
             })
         else:
             return JsonResponse({
-                'code': 200,
+                'code': 0,
                 'msg': '成功',
-                'data': result
+                # 'data': result
             })
 
 
