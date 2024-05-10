@@ -46,7 +46,9 @@ async def async_search_apk_function(request):
 def earch_apk_more_version(request):
     if request.method == 'POST':
         app_id = request.POST.get('app_id')
+        print(app_id)
         all_apk = MoreVersionApk.objects.filter(apk_name=app_id)
+        print(all_apk)
         data = []
         if len(all_apk) > 0:
             for i in all_apk:
@@ -54,7 +56,9 @@ def earch_apk_more_version(request):
                     'apk_name': i.apk_name,
                     'apk_version': i.apk_version,
                     'apk_download_url': i.apk_download_url,
-                    'update_content': i.update_content
+                    'update_content': i.update_content,
+                    'down_path': i.down_path,
+                    'status': i.status
                 })
 
             # print(data)

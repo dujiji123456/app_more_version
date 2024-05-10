@@ -122,9 +122,7 @@ class APKPureScraper:
     def multi_thread(self, app_more_version_list):
         n = 1
         threads = []
-        print("长度：", len(app_more_version_list))
         for i in range(len(app_more_version_list)):
-            print(11111111111, app_more_version_list[i])
             t = threading.Thread(target=self.down_app, args=(app_more_version_list[i],))  # 这里将splitList[i]传递给down_app方法
             threads.append(t)
             t.start()
@@ -140,7 +138,7 @@ class APKPureScraper:
             response = self.retry(apk_download_url)
             total_size = int(response.headers.get('content-length', 0))
 
-            download_dir = r'E:\apkdjango\apkmoreversion\apkapps\downloads'
+            download_dir = r'E:\apkdjango\app\more_version\apkapps\downloads'
             # download_dir = r'E:\python\test\app\apkapps\downloads'
             # download_dir = 项目路径 + 'apkmoreversion/apkapps/downloads'
             if not os.path.lexists(os.path.join(download_dir, apk_name)):
