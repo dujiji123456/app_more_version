@@ -34,8 +34,6 @@ class APKPureScraper:
         user = databases['USER']
         password = databases['PASSWORD']
         db_name = databases['NAME']
-
-
         self.conn = pymysql.connect(host=host, user=user, password=password, database=db_name)  # 连接数据库
         self.cursor = self.conn.cursor()  # 创建一个数据库游标
         self.data = []  # 初始化数据列表
@@ -148,7 +146,8 @@ class APKPureScraper:
             total_size = int(response.headers.get('content-length', 0))
 
             # download_dir = r'E:\apkdjango\app\more_version\apkapps\downloads'
-            download_dir = r'./apkmoreversion/apkapps/downloads'
+            BASE_DIR = settings.BASE_DIR
+            download_dir = BASE_DIR+r'/apkapps/downloads'
             if not os.path.lexists(os.path.join(download_dir, apk_name)):
                 os.makedirs(os.path.join(download_dir, apk_name), exist_ok=True)
             if response:
@@ -272,5 +271,6 @@ if __name__ == '__main__':
     apk_scraper = APKPureScraper()  # 创建APKPureScraper实例
     state = apk_scraper.main('com.ANGamingStudio.IndianVehiclesSimulator3d')  # 调用main函数爬取数据
     print(state)  # 打印结果
+
 
 
