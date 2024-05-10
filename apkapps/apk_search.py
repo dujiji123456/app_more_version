@@ -147,7 +147,8 @@ class APKPureScraper:
 
             # download_dir = r'E:\apkdjango\app\more_version\apkapps\downloads'
             BASE_DIR = settings.BASE_DIR
-            download_dir = BASE_DIR+r'/apkapps/downloads'
+            # download_dir = BASE_DIR+r'/apkapps/downloads'
+            download_dir = r''+ BASE_DIR
             if not os.path.lexists(os.path.join(download_dir, apk_name)):
                 os.makedirs(os.path.join(download_dir, apk_name), exist_ok=True)
             if response:
