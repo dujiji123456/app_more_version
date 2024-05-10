@@ -53,7 +53,7 @@ class APKPureScraper:
                     root.xpath(f'//div[@data-dt-app="{q}"]//a[contains(@class,"first-info")]/@href')[0]  # 获取游戏链接
             else:
                 raise ValueError('获取不到此游戏 请更换包名')  # 抛出异常
-            resp = self.scraper.get(game_download_first_url)  # 发送游戏下载链接请求
+            resp = self.scraper.get(game_download_first_url, verify=False)  # 发送游戏下载链接请求
             res = resp.content.decode()  # 解码响应内容
             root = etree.HTML(res)  # 解析HTML
             version_list = root.xpath('//div[@class="card version-list"]/a') or root.xpath(
@@ -63,7 +63,7 @@ class APKPureScraper:
             else:
                 if version_list[-1].xpath('@class')[0] == 'more-version':  # 判断是否需要获取更多版本链接
                     more_version_url = version_list[-1].xpath('@href')[0]  # 获取更多版本链接
-                    resp = self.scraper.get(more_version_url)  # 发送更多版本链接请求
+                    resp = self.scraper.get(more_version_url, verify=False)  # 发送更多版本链接请求
                     res = resp.content.decode()  # 解码响应内容
                     root = etree.HTML(res)  # 解析HTML
                     li_list = root.xpath('//div[@class="ver_content_box"]/ul/li')  # 获取版本列表
@@ -97,7 +97,7 @@ class APKPureScraper:
                         apk_url = i.xpath('@href')[0]  # 获取apk下载链接
                         print(apk_url)
 
-                        resp = self.scraper.get(apk_url)  # 发送apk下载链接请求
+                        resp = self.scraper.get(apk_url, verify=False)  # 发送apk下载链接请求
                         res = resp.content.decode()  # 解码响应内容
                         root = etree.HTML(res)  # 解析HTML
                         apk_version = \
@@ -147,7 +147,6 @@ class APKPureScraper:
 
             # download_dir = r'E:\apkdjango\app\more_version\apkapps\downloads'
             BASE_DIR = settings.BASE_DIR
-            # download_dir = BASE_DIR+r'/apkapps/downloads'
             download_dir = str(BASE_DIR)+r'apkapps/downloads'
             if not os.path.lexists(os.path.join(download_dir, apk_name)):
                 os.makedirs(os.path.join(download_dir, apk_name), exist_ok=True)
@@ -181,7 +180,7 @@ class APKPureScraper:
         time_out = 10
         retry_count = 0
         for _ in range(max_retries):
-            response = self.make_request(apk_download_url, time_out, retry_count, max_retries)
+            response = self.make_request(apk_download_url, time_out, retry_count, max_retries,)
             if response:
                 if response.status_code == 200:
                     return response
@@ -191,7 +190,7 @@ class APKPureScraper:
 
     def make_request(self, apk_download_url, time_out, retry_count, max_retries):
         try:
-            response = requests.get(apk_download_url, headers=self.headers, timeout=time_out, stream=True)
+            response = requests.get(apk_download_url, headers=self.headers, timeout=time_out, stream=True, verify=False)
             return response
         except (requests.exceptions.RequestException, ValueError) as e:
             if retry_count == max_retries:
