@@ -12,8 +12,10 @@ from concurrent import futures
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import threading
-# import pooch
 from .models import MoreVersionApk
+from apkmoreversion import settings
+
+
 
 logger = logging.getLogger("global_logger")
 logger.setLevel(logging.ERROR)
@@ -27,7 +29,14 @@ class APKPureScraper:
     def __init__(self):
         self.sign_key = '34c79de5474eb652'  # 密钥
         self.scraper = cfscrape.create_scraper(delay=10)  # 创建一个带有延迟的请求器
-        self.conn = pymysql.connect(host='localhost', user='root', password='123456', database='apkdiango')  # 连接数据库
+        databases = settings.DATABASES['default']
+        host = databases['HOST']
+        user = databases['USER']
+        password = databases['PASSWORD']
+        db_name = databases['NAME']
+
+
+        self.conn = pymysql.connect(host=host, user=user, password=password, database=db_name)  # 连接数据库
         self.cursor = self.conn.cursor()  # 创建一个数据库游标
         self.data = []  # 初始化数据列表
         self.headers = {
@@ -264,3 +273,5 @@ if __name__ == '__main__':
     apk_scraper = APKPureScraper()  # 创建APKPureScraper实例
     state = apk_scraper.main('com.ANGamingStudio.IndianVehiclesSimulator3d')  # 调用main函数爬取数据
     print(state)  # 打印结果
+
+
