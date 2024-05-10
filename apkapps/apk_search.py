@@ -231,12 +231,12 @@ class APKPureScraper:
         }
 
         payload["sign"] = self.make_signature(payload, '34c79de5474eb652')  # 生成签名
-        res = requests.post("http://8.217.220.140:8088/task/loadUrl", headers={'Content-Type': 'application/json'},
-                            json=payload)  # 发送POST请求
-
-        print(payload)  # 打印请求参数
-        print(res.status_code)  # 打印响应状态码
-        print(res.text)  # 打印响应内容
+        # res = requests.post("http://8.217.220.140:8088/task/loadUrl", headers={'Content-Type': 'application/json'},
+        #                     json=payload)  # 发送POST请求
+        #
+        # print(payload)  # 打印请求参数
+        # print(res.status_code)  # 打印响应状态码
+        # print(res.text)  # 打印响应内容
 
     def make_signature(self, data, sign_key):  # 生成签名方法
         sorted_data = dict(sorted(data.items()))  # 对请求参数进行排序
