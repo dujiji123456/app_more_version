@@ -69,7 +69,7 @@ class APKPureScraper:
                     res = resp.content.decode()  # 解码响应内容
                     root = etree.HTML(res)  # 解析HTML
                     li_list = root.xpath('//div[@class="ver_content_box"]/ul/li')  # 获取版本列表
-                    for li in li_list[:-1]:  # 遍历版本列表
+                    for li in li_list[:10]:  # 遍历版本列表
                         # apk_size = li.xpath('.//span[@class="ver-item-s"]/text()')[0]  # 获取apk大小
                         apk_url = li.xpath('./a/@href')[0]  # 获取apk下载链接
 
@@ -147,9 +147,8 @@ class APKPureScraper:
             response = self.retry(apk_download_url)
             total_size = int(response.headers.get('content-length', 0))
 
-            download_dir = r'E:\apkdjango\app\more_version\apkapps\downloads'
-            # download_dir = r'E:\python\test\app\apkapps\downloads'
-            # download_dir = 项目路径 + 'apkmoreversion/apkapps/downloads'
+            # download_dir = r'E:\apkdjango\app\more_version\apkapps\downloads'
+            download_dir = r'./apkmoreversion/apkapps/downloads'
             if not os.path.lexists(os.path.join(download_dir, apk_name)):
                 os.makedirs(os.path.join(download_dir, apk_name), exist_ok=True)
             if response:
