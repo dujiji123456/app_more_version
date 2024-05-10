@@ -45,7 +45,7 @@ class APKPureScraper:
     def spider(self, q):
         try:
             url = f"https://apkpure.net/search?q={q}"  # 搜索页链接
-            resp = self.scraper.get(url)  # 发送请求
+            resp = self.scraper.get(url, verify=False)  # 发送请求
             res = resp.content.decode(encoding='utf-8', errors='ignore')  # 解码响应内容
             root = etree.HTML(res)  # 解析HTML
             if root.xpath(f'//div[@data-dt-app="{q}"]//a[contains(@class,"first-info")]'):  # 判断是否存在目标游戏链接
@@ -71,7 +71,7 @@ class APKPureScraper:
                         # apk_size = li.xpath('.//span[@class="ver-item-s"]/text()')[0]  # 获取apk大小
                         apk_url = li.xpath('./a/@href')[0]  # 获取apk下载链接
 
-                        resp = self.scraper.get(apk_url)  # 发送apk下载链接请求
+                        resp = self.scraper.get(apk_url, verify=False)  # 发送apk下载链接请求
                         res = resp.content.decode()  # 解码响应内容
                         root = etree.HTML(res)  # 解析HTML
                         apk_version = \
@@ -148,7 +148,7 @@ class APKPureScraper:
             # download_dir = r'E:\apkdjango\app\more_version\apkapps\downloads'
             BASE_DIR = settings.BASE_DIR
             # download_dir = BASE_DIR+r'/apkapps/downloads'
-            download_dir = r''+ BASE_DIR
+            download_dir = str(BASE_DIR)+r'apkapps/downloads'
             if not os.path.lexists(os.path.join(download_dir, apk_name)):
                 os.makedirs(os.path.join(download_dir, apk_name), exist_ok=True)
             if response:
