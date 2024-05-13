@@ -20,7 +20,7 @@ async def async_search_apk_function(request):
         if result == '获取失败':
             return JsonResponse({
                 'code': 1,
-                'msg': '获取失败',  # 修改为具体的错误消息
+                # 'msg': '获取失败',  # 修改为具体的错误消息
                 # 'data': result
             })
 
@@ -37,14 +37,14 @@ async def async_search_apk_function(request):
                 if item["is_update"] == 1:
                     return JsonResponse({
                         'code': 2,
-                        'msg': '获取最新版本',
+                        # 'msg': '获取最新版本',
                         # 'data': result
                     })
                 else:
                     return JsonResponse({
                         'code': 0,
-                        'msg': '获取成功',
-                        'data': result
+                        # 'msg': '获取成功',
+                        # 'data': result
                     })
 
 
