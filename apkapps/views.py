@@ -12,35 +12,40 @@ async def process_request(app_id):
     result = await asyncio.get_event_loop().run_in_executor(None, apk_scraper.main, app_id)
     return result
 
+
 async def async_search_apk_function(request):
     if request.method == 'POST':
         app_id = request.POST.get('app_id')
         result = await process_request(app_id)
         if result == '获取失败':
-
-
-
             return JsonResponse({
                 'code': 1,
-                'msg': '失败',
+                'msg': '获取失败',  # 修改为具体的错误消息
                 # 'data': result
             })
-        else:
+
+        elif result == '无最新版本':
             return JsonResponse({
-                'code': 0,
-                'msg': '成功',
+                'code': 3,
+                'msg': '无最新版本',  # 修改为具体的错误消息
                 # 'data': result
             })
 
-
-
-
-
-
-
-
-
-
+        else:
+            for item in result:
+                apk_version = item['apk_version']
+                if item["is_update"] == 1:
+                    return JsonResponse({
+                        'code': 2,
+                        'msg': f'获取最新版本{apk_version}',
+                        # 'data': result
+                    })
+                else:
+                    return JsonResponse({
+                        'code': 0,
+                        'msg': f'版本{apk_version}获取成功',
+                        # 'data': result
+                    })
 
 
 def earch_apk_more_version(request):
@@ -64,7 +69,7 @@ def earch_apk_more_version(request):
             # print(data)
             return JsonResponse({
                 'code': 200,
-                'msg':'success',
+                'msg': 'success',
                 'data': data
             })
         else:
@@ -73,12 +78,3 @@ def earch_apk_more_version(request):
                 'msg': 'defeat',
                 'data': '数据库中搜索不到请先爬取数据'
             })
-
-
-
-
-
-
-
-
-

@@ -15,8 +15,6 @@ import threading
 from .models import MoreVersionApk
 from apkmoreversion import settings
 
-
-
 logger = logging.getLogger("global_logger")
 logger.setLevel(logging.ERROR)
 handler = logging.FileHandler('log/error.log', 'a')
@@ -43,6 +41,7 @@ class APKPureScraper:
         }
 
     def spider(self, q):
+
         try:
             url = f"https://apkpure.net/search?q={q}"  # 搜索页链接
             resp = self.scraper.get(url, verify=False)  # 发送请求
@@ -68,7 +67,6 @@ class APKPureScraper:
                     root = etree.HTML(res)  # 解析HTML
                     li_list = root.xpath('//div[@class="ver_content_box"]/ul/li')  # 获取版本列表
                     for li in li_list[:10]:  # 遍历版本列表
-                        # apk_size = li.xpath('.//span[@class="ver-item-s"]/text()')[0]  # 获取apk大小
                         apk_url = li.xpath('./a/@href')[0]  # 获取apk下载链接
 
                         resp = self.scraper.get(apk_url, verify=False)  # 发送apk下载链接请求
@@ -82,18 +80,19 @@ class APKPureScraper:
                         if not apk_download_url:
                             apk_download_url = 'https://apkpure.net' + ''.join(
                                 root.xpath("//a[@class='btn jump-downloading-btn']/@href"))
+
                         if root.xpath('//div[@class="module change-log"]'):  # 判断是否存在更新日志
                             change_log = ''.join(
                                 root.xpath('//div[@class="module change-log"]//p[@class="content"]/text()'))  # 获取更新日志
                             data_item = {'apk_name': q, 'apk_version': apk_version,
-                                         'apk_download_url': apk_download_url, 'change_log': change_log}  # 创建数据字典
+                                         'apk_download_url': apk_download_url, 'change_log': change_log,
+                                         'is_update': 0}  # 创建数据字典
                         else:
                             data_item = {'apk_name': q, 'apk_version': apk_version,
-                                         'apk_download_url': apk_download_url, 'change_log': ''}  # 创建数据字典
+                                         'apk_download_url': apk_download_url, 'change_log': '','is_update': 0}  # 创建数据字典
                         self.data.append(data_item)  # 将数据字典添加到数据列表中
                 else:
                     for i in version_list:  # 遍历版本列表
-                        # apk_size = i.xpath('./div[@class="version-info"]//span[@class="size"]/text()')[0]  # 获取apk大小
                         apk_url = i.xpath('@href')[0]  # 获取apk下载链接
                         print(apk_url)
 
@@ -112,16 +111,36 @@ class APKPureScraper:
                             change_log = root.xpath('//div[@class="module change-log"]//p[@class="content"]/text()')[
                                 0]  # 获取更新日志
                             data_item = {'apk_name': q, 'apk_version': apk_version,
-                                         'apk_download_url': apk_download_url, 'change_log': change_log}  # 创建数据字典
+                                         'apk_download_url': apk_download_url, 'change_log': change_log,'is_update': 0}  # 创建数据字典
                         else:
                             data_item = {'apk_name': q, 'apk_version': apk_version,
-                                         'apk_download_url': apk_download_url, 'change_log': ''}  # 创建数据字典
+                                         'apk_download_url': apk_download_url, 'change_log': '','is_update': 0}  # 创建数据字典
                         self.data.append(data_item)  # 将数据字典添加到数据列表中
                         print(data_item)
                         print('---------------------------------------------')
-            print(len(self.data))
-            self.multi_thread(self.data)
-            return self.data  # 返回数据列表
+
+            # print(result)
+            result = MoreVersionApk.objects.filter(apk_name=q)
+            if result:
+                sql_list = []
+                for obj in result:
+                    sql_list.append({'apk_name': obj.apk_name, 'apk_version': obj.apk_version,
+                                     'apk_download_url': obj.apk_download_url, 'change_log': obj.update_content,'is_update': 0})
+                    print(obj.apk_download_url)
+                update_version = []
+                for item in self.data:
+                    if item not in sql_list:
+                        item['is_update'] = 1
+                        update_version.append(item)
+                if update_version:
+                    self.multi_thread(self.data)
+                    return update_version
+                else:
+                    return '无最新版本'
+            else:
+                # print(len(self.data))
+                self.multi_thread(self.data)
+                return self.data  # 返回数据列表
         except Exception as e:
             print(e)
             return '获取失败'  # 返回异常信息
@@ -133,7 +152,6 @@ class APKPureScraper:
             t = threading.Thread(target=self.down_app, args=(app_more_version_list[i],))  # 这里将splitList[i]传递给down_app方法
             threads.append(t)
             t.start()
-
 
     def down_app(self, torront):
         apk_download_url = torront['apk_download_url']
@@ -147,7 +165,7 @@ class APKPureScraper:
 
             # download_dir = r'E:\apkdjango\app\more_version\apkapps\downloads'
             BASE_DIR = settings.BASE_DIR
-            download_dir = str(BASE_DIR)+r'apkapps/downloads'
+            download_dir = str(BASE_DIR) + r'apkapps/downloads'
             if not os.path.lexists(os.path.join(download_dir, apk_name)):
                 os.makedirs(os.path.join(download_dir, apk_name), exist_ok=True)
             if response:
@@ -180,7 +198,7 @@ class APKPureScraper:
         time_out = 10
         retry_count = 0
         for _ in range(max_retries):
-            response = self.make_request(apk_download_url, time_out, retry_count, max_retries,)
+            response = self.make_request(apk_download_url, time_out, retry_count, max_retries, )
             if response:
                 if response.status_code == 200:
                     return response
@@ -190,7 +208,7 @@ class APKPureScraper:
 
     def make_request(self, apk_download_url, time_out, retry_count, max_retries):
         try:
-            response = requests.get(apk_download_url, headers=self.headers, timeout=time_out, stream=True, verify=False)
+            response = requests.get(apk_download_url, headers=self.headers, timeout=time_out, stream=True)
             return response
         except (requests.exceptions.RequestException, ValueError) as e:
             if retry_count == max_retries:
@@ -214,6 +232,7 @@ class APKPureScraper:
     #     print('数据已写入')
 
     def upload(self, item):
+
         change_log = item.get('change_log', '')  # 获取change_log字段，如果不存在默认为空字符串
 
         # 使用 BeautifulSoup 解析 HTML内容提取纯文本
@@ -252,6 +271,8 @@ class APKPureScraper:
         data_list = self.spider(q)  # 调用spider函数获取数据列表
         if data_list == '获取失败':
             return '获取失败'  # 返回获取失败信息
+        elif data_list == '无最新版本':
+            return '无最新版本'
         elif not data_list:
             return ''
         else:
@@ -269,8 +290,5 @@ class APKPureScraper:
 
 if __name__ == '__main__':
     apk_scraper = APKPureScraper()  # 创建APKPureScraper实例
-    state = apk_scraper.main('com.ANGamingStudio.IndianVehiclesSimulator3d')  # 调用main函数爬取数据
+    state = apk_scraper.main('com.dts.freefiremax')  # 调用main函数爬取数据
     print(state)  # 打印结果
-
-
-
