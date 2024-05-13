@@ -23,19 +23,27 @@ async def async_search_apk_function(request):
                 'msg': '获取失败',  # 修改为具体的错误消息
                 # 'data': result
             })
+
+        elif result == '无最新版本':
+            return JsonResponse({
+                'code': 0,
+                # 'msg': '数据库已经存在对应数据',  # 修改为具体的错误消息
+                # 'data': result
+            })
+
         else:
             for item in result:
                 apk_version = item['apk_version']
                 if item["is_update"] == 1:
                     return JsonResponse({
-                        'code': 0,
-                        'msg': f'获取最新版本{apk_version}',
+                        'code': 2,
+                        'msg': '获取最新版本',
                         # 'data': result
                     })
                 else:
                     return JsonResponse({
-                        'code': 2,
-                        'msg': f'版本{apk_version}获取成功',
+                        'code': 0,
+                        'msg': '获取成功',
                         'data': result
                     })
 
