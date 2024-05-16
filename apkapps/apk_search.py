@@ -215,21 +215,6 @@ class APKPureScraper:
                 logging.error(f'{apk_download_url}下载出错,{e}')
             return None
 
-    # def save_to_database(self, data_list):
-    #     for item in data_list:
-    #         try:
-    #             sql = "INSERT INTO apkapps_moreversionapk(apk_version, apk_name, apk_download_url, update_content) VALUES (%s, %s, %s, %s) \
-    #                    ON DUPLICATE KEY UPDATE apk_version = VALUES(apk_version), update_content = VALUES(update_content)"  # 插入或更新语句
-    #             self.cursor.execute(sql, (
-    #                 item['apk_version'], item['apk_name'], item['apk_download_url'], item['change_log']
-    #             ))  # 执行插入或更新语句
-    #             self.conn.commit()  # 提交事务
-    #
-    #         except Exception as e:
-    #             pass
-    #
-    #     self.conn.close()  # 关闭数据库连接
-    #     print('数据已写入')
 
     def upload(self, item):
 
@@ -243,19 +228,13 @@ class APKPureScraper:
         change_log_one = urllib.parse.quote(change_log_text_only)  # 对change_log进行URL编码
 
         payload = {
-            "url": item['apk_download_url'],  # 请求URL
+            # "url": item['apk_download_url'],  # 请求URL
             "packageName": item['apk_name'],  # 应用包名
-            "extraData": change_log_one,  # 额外数据
+            # "extraData": change_log_one,  # 额外数据
             "time": str(int(time.time())),  # 时间戳
         }
 
         payload["sign"] = self.make_signature(payload, '34c79de5474eb652')  # 生成签名
-        # res = requests.post("http://8.217.220.140:8088/task/loadUrl", headers={'Content-Type': 'application/json'},
-        #                     json=payload)  # 发送POST请求
-        #
-        # print(payload)  # 打印请求参数
-        # print(res.status_code)  # 打印响应状态码
-        # print(res.text)  # 打印响应内容
 
     def make_signature(self, data, sign_key):  # 生成签名方法
         sorted_data = dict(sorted(data.items()))  # 对请求参数进行排序
