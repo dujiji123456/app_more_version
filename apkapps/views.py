@@ -24,6 +24,12 @@ async def async_search_apk_function(request):
         signature = request.POST.get('signature')
         print(signature)
 
+        if not signature:
+            return JsonResponse({
+                'message': '签名为空',
+                'status': 'Fail',
+            })
+
         aa = rsa.decrypt(signature)
         print(aa)
 
