@@ -1,4 +1,3 @@
-import hashlib
 import os
 import urllib
 from urllib.parse import quote
@@ -14,6 +13,7 @@ from tqdm import tqdm
 import threading
 from .models import MoreVersionApk
 from apkmoreversion import settings
+import time
 
 logger = logging.getLogger("global_logger")
 logger.setLevel(logging.ERROR)
@@ -25,7 +25,6 @@ logger.addHandler(handler)
 
 class APKPureScraper:
     def __init__(self):
-        self.sign_key = '34c79de5474eb652'  # 密钥
         self.scraper = cfscrape.create_scraper(delay=10)  # 创建一个带有延迟的请求器
         databases = settings.DATABASES['default']
         host = databases['HOST']
@@ -75,11 +74,27 @@ class APKPureScraper:
                         apk_version = \
                             root.xpath("//div[@class='info-content one-line']/span[@class='info-sdk']/span/text()")[
                                 0]  # 获取apk版本号
-                        apk_download_url = ''.join(root.xpath(
-                            "//div[@class='main-body']/main/div[contains(@class,'download-box')]/a[@class='btn download-start-btn' and contains(@href, 'apk') and not(contains(@href, 'xapk')) and not(contains(@href, 'xpak'))]/@href"))  # 获取apk下载链接
-                        if not apk_download_url:
-                            apk_download_url = 'https://apkpure.net' + ''.join(
-                                root.xpath("//a[@class='btn jump-downloading-btn']/@href"))
+                        # apk_download_url = ''.join(root.xpath(
+                        #     "//div[@class='main-body']/main/div[contains(@class,'download-box')]/a[@class='btn download-start-btn' and contains(@href, 'apk') and not(contains(@href, 'xapk')) and not(contains(@href, 'xpak'))]/@href"))  # 获取apk下载链接
+                        #
+                        #
+                        # if not apk_download_url:
+                        #     apk_download_url = 'https://apkpure.net' + ''.join(
+                        #         root.xpath("//a[@class='btn jump-downloading-btn']/@href"))
+
+                        package_name = "".join(root.xpath('//body/@data-package-name'))
+                        version_code = "".join(root.xpath('//body/@data-version-code'))
+                        apk_download_url = f'https://d.apkpure.net/b/APK/{package_name}?versionCode={version_code}'
+
+
+
+
+
+
+
+
+
+
 
                         if root.xpath('//div[@class="module change-log"]'):  # 判断是否存在更新日志
                             change_log = ''.join(
@@ -117,9 +132,7 @@ class APKPureScraper:
                                          'apk_download_url': apk_download_url, 'change_log': '','is_update': 0}  # 创建数据字典
                         self.data.append(data_item)  # 将数据字典添加到数据列表中
                         print(data_item)
-                        print('---------------------------------------------')
 
-            # print(result)
             result = MoreVersionApk.objects.filter(apk_name=q)
             if result:
                 sql_list = []
@@ -227,25 +240,6 @@ class APKPureScraper:
 
         change_log_one = urllib.parse.quote(change_log_text_only)  # 对change_log进行URL编码
 
-        payload = {
-            # "url": item['apk_download_url'],  # 请求URL
-            "packageName": item['apk_name'],  # 应用包名
-            # "extraData": change_log_one,  # 额外数据
-            "time": str(int(time.time())),  # 时间戳
-        }
-
-        payload["sign"] = self.make_signature(payload, '34c79de5474eb652')  # 生成签名
-
-    def make_signature(self, data, sign_key):  # 生成签名方法
-        sorted_data = dict(sorted(data.items()))  # 对请求参数进行排序
-        s = ''  # 签名字符串初始化
-        for k, v in sorted_data.items():
-            v = quote(v, safe='')  # 对参数值进行URL编码
-            s += "&{}={}".format(k, v)  # 拼接排序后的参数字符串
-        s = s[1:]  # 去除签名字符串的第一个字符
-
-        return hashlib.md5((s + sign_key).encode('utf-8')).hexdigest()  # 使用MD5算法生成签名的哈希值
-
     def main(self, q):
         data_list = self.spider(q)  # 调用spider函数获取数据列表
         if data_list == '获取失败':
@@ -269,5 +263,5 @@ class APKPureScraper:
 
 if __name__ == '__main__':
     apk_scraper = APKPureScraper()  # 创建APKPureScraper实例
-    state = apk_scraper.main('com.dts.freefiremax')  # 调用main函数爬取数据
+    state = apk_scraper.main('com.game.bus.rush')  # 调用main函数爬取数据
     print(state)  # 打印结果
