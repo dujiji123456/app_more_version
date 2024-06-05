@@ -78,8 +78,8 @@ DATABASES = {
     'default': {
         'ENGINE': "django.db.backends.mysql",
         'NAME': 'apkdiango',  # 数据库名
-        'USER': 'root',  # 用户名
-        'PASSWORD': '123456',  # 密码
+        'USER': 'jack',  # 用户名
+        'PASSWORD': '010711',  # 密码
         'HOST': '127.0.0.1',  # 主机地址
         'PORT': 3306,  # 端口号
         'OPTIONS': {
